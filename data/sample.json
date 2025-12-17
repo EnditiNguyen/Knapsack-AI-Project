@@ -1,0 +1,35 @@
+{
+    "capacity": 53,
+    "items": [
+        {
+            "name": "Item_1",
+            "weight": 20,
+            "value": 83
+        },
+        {
+            "name": "Item_2",
+            "weight": 20,
+            "value": 53
+        },
+        {
+            "name": "Item_3",
+            "weight": 15,
+            "value": 54
+        },
+        {
+            "name": "Item_4",
+            "weight": 17,
+            "value": 63
+        },
+        {
+            "name": "Item_5",
+            "weight": 18,
+            "value": 22
+        },
+        {
+            "name": "Item_6",
+            "weight": 16,
+            "value": 33
+        }
+    ]
+}

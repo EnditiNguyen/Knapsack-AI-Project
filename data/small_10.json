@@ -1,0 +1,55 @@
+{
+    "capacity": 45,
+    "items": [
+        {
+            "name": "Item_1",
+            "weight": 3,
+            "value": 26
+        },
+        {
+            "name": "Item_2",
+            "weight": 16,
+            "value": 32
+        },
+        {
+            "name": "Item_3",
+            "weight": 7,
+            "value": 57
+        },
+        {
+            "name": "Item_4",
+            "weight": 18,
+            "value": 100
+        },
+        {
+            "name": "Item_5",
+            "weight": 3,
+            "value": 75
+        },
+        {
+            "name": "Item_6",
+            "weight": 11,
+            "value": 51
+        },
+        {
+            "name": "Item_7",
+            "weight": 12,
+            "value": 31
+        },
+        {
+            "name": "Item_8",
+            "weight": 9,
+            "value": 61
+        },
+        {
+            "name": "Item_9",
+            "weight": 10,
+            "value": 96
+        },
+        {
+            "name": "Item_10",
+            "weight": 2,
+            "value": 32
+        }
+    ]
+}
