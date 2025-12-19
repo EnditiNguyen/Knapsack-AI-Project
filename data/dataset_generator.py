@@ -23,7 +23,7 @@ test_cases = {
     "small_10.json": 10,
     "medium_30.json": 30,
     "large_100.json": 100,
-    "sample.json": 6
+    "sample.json": 10
 }
 
 for filename, n in test_cases.items():

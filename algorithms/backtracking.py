@@ -1,30 +1,13 @@
 import time
-from abc import ABC, abstractmethod
 from typing import List
+try:
+    from algorithms.base import Item, KnapsackResult, KnapsackSolver
+except ImportError:
+    from base import Item, KnapsackResult, KnapsackSolver
 
-# Lớp Item phải được định nghĩa ở đây
-class Item:
-    def __init__(self, name: str, weight: int, value: int):
-        self.name = name
-        self.weight = weight
-        self.value = value
-        self.ratio = value / weight if weight > 0 else 0
-
-    def __repr__(self):
-        return f"Item({self.name}, {self.weight}kg, {self.value}$)"
-
-# Lớp kết quả trả về
-class KnapsackResult:
-    def __init__(self, max_value: int, selected_items: List[Item], total_weight: int, execution_time: float):
-        self.max_value = max_value
-        self.selected_items = selected_items
-        self.total_weight = total_weight
-        self.execution_time = execution_time
-
-# Thuật toán Nhánh cận (Branch and Bound)
-class BranchAndBoundSolver:
-    def solve(self, items: List[Item], capacity: int) -> KnapsackResult:
-        # Sắp xếp theo tỷ lệ giá trị/khối lượng
+class BranchAndBoundSolver(KnapsackSolver):
+    def solve(self, items: List[Item], capacity: float) -> KnapsackResult:
+        # Sắp xếp vật phẩm theo tỷ lệ giá trị/khối lượng giảm dần để cắt nhánh hiệu quả
         self.items = sorted(items, key=lambda x: x.ratio, reverse=True)
         self.capacity = capacity
         self.n = len(self.items)
@@ -36,15 +19,14 @@ class BranchAndBoundSolver:
         exec_time = time.time() - start_time
         
         return KnapsackResult(
-            self.best_value, 
-            self.best_items, 
-            sum(i.weight for i in self.best_items),
-            exec_time
+            max_value=self.best_value,
+            selected_items=self.best_items,
+            total_weight=sum(i.weight for i in self.best_items),
+            execution_time=exec_time
         )
 
     def _bound(self, index, current_weight, current_value):
-        if current_weight >= self.capacity:
-            return 0
+        if current_weight >= self.capacity: return 0
         bound_val = current_value
         total_w = current_weight
         j = index
@@ -57,16 +39,22 @@ class BranchAndBoundSolver:
         return bound_val
 
     def _bnb(self, index, current_weight, current_value, current_items):
-        if self._bound(index, current_weight, current_value) <= self.best_value:
-            return
         if index == self.n:
             if current_value > self.best_value:
                 self.best_value = current_value
                 self.best_items = list(current_items)
             return
+
+        # Kiểm tra xem cận trên có tốt hơn kết quả tốt nhất hiện tại không
+        if self._bound(index, current_weight, current_value) <= self.best_value:
+            return
+
+        # Nhánh 1: Chọn vật phẩm hiện tại
         item = self.items[index]
         if current_weight + item.weight <= self.capacity:
             current_items.append(item)
             self._bnb(index + 1, current_weight + item.weight, current_value + item.value, current_items)
             current_items.pop()
+
+        # Nhánh 2: Không chọn vật phẩm hiện tại
         self._bnb(index + 1, current_weight, current_value, current_items)

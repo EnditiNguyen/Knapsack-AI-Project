@@ -1,155 +1,155 @@
 {
-    "capacity": 154,
+    "capacity": 165,
     "items": [
         {
             "name": "Item_1",
-            "weight": 13,
-            "value": 58
+            "weight": 5,
+            "value": 16
         },
         {
             "name": "Item_2",
-            "weight": 10,
-            "value": 18
+            "weight": 5,
+            "value": 41
         },
         {
             "name": "Item_3",
-            "weight": 17,
-            "value": 84
+            "weight": 13,
+            "value": 26
         },
         {
             "name": "Item_4",
-            "weight": 12,
-            "value": 99
+            "weight": 3,
+            "value": 91
         },
         {
             "name": "Item_5",
-            "weight": 10,
+            "weight": 9,
             "value": 75
         },
         {
             "name": "Item_6",
-            "weight": 6,
-            "value": 20
+            "weight": 3,
+            "value": 49
         },
         {
             "name": "Item_7",
-            "weight": 8,
-            "value": 41
+            "weight": 5,
+            "value": 54
         },
         {
             "name": "Item_8",
-            "weight": 10,
-            "value": 82
+            "weight": 8,
+            "value": 60
         },
         {
             "name": "Item_9",
-            "weight": 17,
-            "value": 26
-        },
-        {
-            "name": "Item_10",
-            "weight": 13,
+            "weight": 19,
             "value": 25
         },
         {
+            "name": "Item_10",
+            "weight": 1,
+            "value": 12
+        },
+        {
             "name": "Item_11",
-            "weight": 2,
-            "value": 43
+            "weight": 20,
+            "value": 95
         },
         {
             "name": "Item_12",
-            "weight": 12,
-            "value": 43
+            "weight": 14,
+            "value": 73
         },
         {
             "name": "Item_13",
             "weight": 8,
-            "value": 93
+            "value": 49
         },
         {
             "name": "Item_14",
             "weight": 12,
-            "value": 64
+            "value": 51
         },
         {
             "name": "Item_15",
-            "weight": 19,
-            "value": 34
+            "weight": 10,
+            "value": 12
         },
         {
             "name": "Item_16",
-            "weight": 1,
-            "value": 66
+            "weight": 19,
+            "value": 54
         },
         {
             "name": "Item_17",
-            "weight": 6,
-            "value": 97
+            "weight": 11,
+            "value": 30
         },
         {
             "name": "Item_18",
-            "weight": 7,
-            "value": 85
+            "weight": 19,
+            "value": 95
         },
         {
             "name": "Item_19",
-            "weight": 6,
-            "value": 34
+            "weight": 17,
+            "value": 70
         },
         {
             "name": "Item_20",
-            "weight": 15,
-            "value": 19
+            "weight": 17,
+            "value": 61
         },
         {
             "name": "Item_21",
-            "weight": 5,
-            "value": 89
+            "weight": 16,
+            "value": 80
         },
         {
             "name": "Item_22",
-            "weight": 12,
-            "value": 59
+            "weight": 11,
+            "value": 23
         },
         {
             "name": "Item_23",
-            "weight": 10,
-            "value": 11
+            "weight": 19,
+            "value": 80
         },
         {
             "name": "Item_24",
-            "weight": 7,
-            "value": 92
+            "weight": 6,
+            "value": 53
         },
         {
             "name": "Item_25",
-            "weight": 2,
-            "value": 58
+            "weight": 15,
+            "value": 16
         },
         {
             "name": "Item_26",
-            "weight": 16,
-            "value": 58
+            "weight": 10,
+            "value": 90
         },
         {
             "name": "Item_27",
-            "weight": 13,
-            "value": 11
+            "weight": 1,
+            "value": 99
         },
         {
             "name": "Item_28",
-            "weight": 16,
-            "value": 73
+            "weight": 7,
+            "value": 93
         },
         {
             "name": "Item_29",
-            "weight": 7,
-            "value": 60
+            "weight": 15,
+            "value": 50
         },
         {
             "name": "Item_30",
-            "weight": 16,
-            "value": 94
+            "weight": 13,
+            "value": 52
         }
     ]
 }

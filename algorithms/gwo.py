@@ -1,50 +1,75 @@
 import numpy as np
 import time
 import random
-# Import từ file backtracking cùng thư mục
+from typing import List
 try:
-    from algorithms.backtracking import Item, KnapsackResult
+    from algorithms.base import Item, KnapsackResult, KnapsackSolver
 except ImportError:
-    from backtracking import Item, KnapsackResult
+    from base import Item, KnapsackResult, KnapsackSolver
 
-class GWOSolver:
-    def __init__(self, pack_size=20, max_iter=100):
+class GWOSolver(KnapsackSolver):
+    def __init__(self, pack_size: int = 50, max_iter: int = 200):
         self.pack_size = pack_size
         self.max_iter = max_iter
 
-    def solve(self, items, capacity) -> KnapsackResult:
+    def _sigmoid(self, x):
+        x = np.clip(x, -10, 10)
+        return 1 / (1 + np.exp(-x))
+
+    def solve(self, items: List[Item], capacity: float) -> KnapsackResult:
         n = len(items)
         if n == 0: return KnapsackResult(0, [], 0, 0)
         
         start_time = time.time()
         weights = np.array([it.weight for it in items])
         values = np.array([it.value for it in items])
+        positions = np.random.uniform(-3, 3, (self.pack_size, n))
         
-        # Khởi tạo đàn sói
-        positions = np.random.uniform(0, 1, (self.pack_size, n))
-        alpha_pos, alpha_score = np.zeros(n), -1
+        alpha_pos, alpha_score = np.zeros(n), -1e9
+        beta_pos, beta_score = np.zeros(n), -1e9
+        delta_pos, delta_score = np.zeros(n), -1e9
 
         for l in range(self.max_iter):
             for i in range(self.pack_size):
-                # Chuyển đổi nhị phân và tính fitness
-                binary_sol = (positions[i] > 0.5).astype(int)
+                s_v = self._sigmoid(positions[i])
+                binary_sol = (s_v > random.random()).astype(int)
+                
                 tw = np.dot(binary_sol, weights)
                 tv = np.dot(binary_sol, values)
                 
-                if tw <= capacity and tv > alpha_score:
-                    alpha_score, alpha_pos = tv, positions[i].copy()
+                # Hàm phạt: Trừ điểm nặng nếu vượt sức chứa
+                fitness = tv if tw <= capacity else tv - (tw - capacity) * 1000
+                
+                if fitness > alpha_score:
+                    alpha_score, alpha_pos = fitness, positions[i].copy()
+                elif fitness > beta_score:
+                    beta_score, beta_pos = fitness, positions[i].copy()
+                elif fitness > delta_score:
+                    delta_score, delta_pos = fitness, positions[i].copy()
 
             a = 2 - l * (2 / self.max_iter)
             for i in range(self.pack_size):
-                r1, r2 = random.random(), random.random()
-                A, C = 2 * a * r1 - a, 2 * r2
-                D = abs(C * alpha_pos - positions[i])
-                positions[i] = alpha_pos - A * D
-            
-            positions = np.clip(positions, 0, 1)
+                for target in [alpha_pos, beta_pos, delta_pos]:
+                    r1, r2 = random.random(), random.random()
+                    A, C = 2 * a * r1 - a, 2 * r2
+                    D = abs(C * target - positions[i])
+                    positions[i] = (positions[i] + (target - A * D)) / 2
+            positions = np.clip(positions, -3, 3)
 
-        exec_time = time.time() - start_time
-        selected_indices = np.where(alpha_pos > 0.5)[0]
-        selected_items = [items[i] for i in selected_indices]
+        # Trích xuất kết quả và sửa lỗi nếu còn vượt sức chứa
+        final_binary = (self._sigmoid(alpha_pos) > 0.5).astype(int)
+        selected_items = [items[i] for i in range(n) if final_binary[i] == 1]
         
-        return KnapsackResult(int(alpha_score), selected_items, sum(it.weight for it in selected_items), exec_time)
+        total_w = sum(it.weight for it in selected_items)
+        if total_w > capacity:
+            selected_items.sort(key=lambda x: x.ratio)
+            while total_w > capacity and selected_items:
+                removed = selected_items.pop(0)
+                total_w -= removed.weight
+
+        return KnapsackResult(
+            max_value=sum(it.value for it in selected_items),
+            selected_items=selected_items,
+            total_weight=total_w,
+            execution_time=time.time() - start_time
+        )
