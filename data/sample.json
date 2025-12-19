@@ -1,15 +1,55 @@
 {
-    "capacity": 50,
+    "capacity": 50.0,
     "items": [
-        {"name": "Laptop", "weight": 3, "value": 200},
-        {"name": "Iphone", "weight": 1, "value": 150},
-        {"name": "Máy ảnh", "weight": 2, "value": 100},
-        {"name": "Sách AI", "weight": 1, "value": 50},
-        {"name": "Loa Bluetooth", "weight": 2, "value": 80},
-        {"name": "Airpod", "weight": 1, "value": 100},
-        {"name": "Mouse", "weight": 1, "value": 30},
-        {"name": "Bàn phím", "weight": 2, "value": 125},
-        {"name": "Đồng hồ", "weight": 1, "value": 120},
-        {"name": "Ipad", "weight": 1.5, "value": 300}
+        {
+            "name": "Laptop",
+            "weight": 3,
+            "value": 200
+        },
+        {
+            "name": "Iphone",
+            "weight": 1,
+            "value": 150
+        },
+        {
+            "name": "Máy ảnh",
+            "weight": 2,
+            "value": 100
+        },
+        {
+            "name": "Sách AI",
+            "weight": 1,
+            "value": 50
+        },
+        {
+            "name": "Loa Bluetooth",
+            "weight": 2,
+            "value": 80
+        },
+        {
+            "name": "Airpod",
+            "weight": 1,
+            "value": 100
+        },
+        {
+            "name": "Mouse",
+            "weight": 1,
+            "value": 30
+        },
+        {
+            "name": "Bàn phím",
+            "weight": 2.0,
+            "value": 125.0
+        },
+        {
+            "name": "Đồng hồ",
+            "weight": 1,
+            "value": 120
+        },
+        {
+            "name": "Ipad",
+            "weight": 1.5,
+            "value": 300
+        }
     ]
 }

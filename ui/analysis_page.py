@@ -1,8 +1,10 @@
 import tkinter as tk
+import tkinter as tk
 from tkinter import messagebox
 import threading
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 # Import hàm từ file benchmark
@@ -18,71 +20,96 @@ class AnalysisPage(tk.Frame):
     def __init__(self, parent, csv_path):
         super().__init__(parent, bg="#f0f2f5")
         self.csv_path = csv_path
+        # Thiết lập style seaborn ngay khi khởi tạo
+        sns.set_theme(style="whitegrid", palette="muted")
         self.setup_ui()
 
     def setup_ui(self):
-        header = tk.Frame(self, bg="#f0f2f5", padx=20, pady=10)
+        header = tk.Frame(self, bg="#f0f2f5", padx=20, pady=15)
         header.pack(fill=tk.X)
         
-        tk.Label(header, text="📊 PHÂN TÍCH & SO SÁNH", font=("Segoe UI", 14, "bold"), bg="#f0f2f5").pack(side=tk.LEFT)
+        tk.Label(header, text="📊 PHÂN TÍCH CHUYÊN SÂU", 
+                 font=("Segoe UI", 16, "bold"), bg="#f0f2f5", fg="#2c3e50").pack(side=tk.LEFT)
         
-        # Nút Chạy Benchmark
-        self.btn_run = tk.Button(header, text="🔥 CHẠY BENCHMARK MỚI", command=self.trigger_benchmark, 
-                                 bg="#ea4335", fg="white", font=("Segoe UI", 9, "bold"), padx=10)
-        self.btn_run.pack(side=tk.RIGHT, padx=5)
+        # Nhóm nút điều khiển
+        btn_frame = tk.Frame(header, bg="#f0f2f5")
+        btn_frame.pack(side=tk.RIGHT)
 
-        # Nút Refresh
-        tk.Button(header, text="🔄 Làm mới biểu đồ", command=self.load_and_plot, 
-                  bg="#1a73e8", fg="white", padx=10).pack(side=tk.RIGHT)
+        self.btn_run = tk.Button(btn_frame, text="🔥 CHẠY BENCHMARK", command=self.trigger_benchmark, 
+                                 bg="#ea4335", fg="white", font=("Segoe UI", 9, "bold"), 
+                                 padx=15, pady=5, relief=tk.FLAT)
+        self.btn_run.pack(side=tk.LEFT, padx=5)
+
+        tk.Button(btn_frame, text="🔄 LÀM MỚI", command=self.load_and_plot, 
+                  bg="#1a73e8", fg="white", font=("Segoe UI", 9, "bold"),
+                  padx=15, pady=5, relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
 
         self.fig_container = tk.Frame(self, bg="white")
-        self.fig_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        self.fig_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
 
     def trigger_benchmark(self):
-        self.btn_run.config(state=tk.DISABLED, text="⌛ Đang chạy...")
+        self.btn_run.config(state=tk.DISABLED, text="⌛ ĐANG TÍNH TOÁN...")
         threading.Thread(target=self._run_task, daemon=True).start()
 
     def _run_task(self):
         try:
             run_benchmark_on_existing_data()
             self.after(0, self.load_and_plot)
-            self.after(0, lambda: messagebox.showinfo("Thành công", "Đã hoàn thành chạy thử nghiệm trên 3 bộ dữ liệu!"))
+            self.after(0, lambda: messagebox.showinfo("Thông báo", "Đã cập nhật dữ liệu benchmark mới!"))
         except Exception as e:
             self.after(0, lambda: messagebox.showerror("Lỗi", str(e)))
         finally:
-            self.after(0, lambda: self.btn_run.config(state=tk.NORMAL, text="🔥 CHẠY BENCHMARK MỚI"))
+            self.after(0, lambda: self.btn_run.config(state=tk.NORMAL, text="🔥 CHẠY BENCHMARK"))
 
     def load_and_plot(self):
+        # Xóa các biểu đồ cũ
         for w in self.fig_container.winfo_children(): w.destroy()
         
         if not os.path.exists(self.csv_path):
-            tk.Label(self.fig_container, text="Chưa có kết quả. Nhấn nút 'CHẠY BENCHMARK MỚI' để bắt đầu.", 
-                     bg="white", font=("Segoe UI", 11)).pack(pady=50)
+            tk.Label(self.fig_container, text="Chưa có dữ liệu. Vui lòng nhấn 'CHẠY BENCHMARK'.", 
+                     bg="white", font=("Segoe UI", 12)).pack(pady=100)
             return
 
         try:
+            # 1. Đọc dữ liệu
             df = pd.read_csv(self.csv_path)
-            # Lọc bỏ các giá trị N/A để vẽ biểu đồ thời gian
-            df_plot = df[df['BT_Value'] != "N/A (Too large)"].copy()
-            df_plot['BT_Time'] = df_plot['BT_Time'].astype(float)
 
-            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+            # 2. Tiền xử lý: Chuyển từ Wide sang Long format để dùng được hue của Seaborn
+            # Chuyển đổi Thời gian
+            df_time = df.melt(id_vars=['Num_Items'], value_vars=['BT_Time', 'GWO_Time'],
+                              var_name='Algorithm', value_name='Time (s)')
+            df_time['Algorithm'] = df_time['Algorithm'].replace({'BT_Time': 'Backtracking', 'GWO_Time': 'GWO AI'})
 
-            # Biểu đồ 1: Thời gian thực thi
-            ax1.plot(df_plot['Num_Items'], df_plot['BT_Time'], 'o-', label='Backtracking', color='#a142f4')
-            ax1.plot(df['Num_Items'], df['GWO_Time'], 's-', label='GWO AI', color='#1e8e3e')
-            ax1.set_title("Thời gian xử lý (giây)")
-            ax1.set_xlabel("Số lượng vật phẩm")
-            ax1.legend()
+            # Chuyển đổi Giá trị (Lọc bỏ các dòng N/A của BT nếu có)
+            df_temp = df.copy()
+            df_temp['BT_Value'] = pd.to_numeric(df_temp['BT_Value'], errors='coerce')
+            df_val = df_temp.melt(id_vars=['Num_Items'], value_vars=['BT_Value', 'GWO_Value'],
+                                  var_name='Algorithm', value_name='Max Value')
+            df_val['Algorithm'] = df_val['Algorithm'].replace({'BT_Value': 'Backtracking', 'GWO_Value': 'GWO AI'})
 
-            # Biểu đồ 2: So sánh giá trị đạt được
-            ax2.bar(df['Num_Items'].astype(str), df['GWO_Value'], color='#81c995', label='GWO Value')
-            ax2.set_title("Tổng giá trị tìm thấy (GWO)")
-            ax2.set_xlabel("Bộ dữ liệu")
+            # 3. Vẽ biểu đồ với Seaborn
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
 
-            fig.tight_layout()
+            # Biểu đồ 1: Thời gian thực thi (Sử dụng Log Scale như bạn yêu cầu)
+            sns.barplot(data=df_time, x='Num_Items', y='Time (s)', hue='Algorithm', ax=ax1)
+            ax1.set_title('So sánh thời gian chạy (Giây)', fontsize=12, fontweight='bold', pad=15)
+            ax1.set_yscale('log')
+            ax1.set_xlabel('Số lượng vật phẩm')
+            ax1.set_ylabel('Thời gian (log scale)')
+
+            # Biểu đồ 2: Giá trị tối ưu
+            sns.barplot(data=df_val, x='Num_Items', y='Max Value', hue='Algorithm', ax=ax2)
+            ax2.set_title('So sánh Giá trị tối ưu tìm được', fontsize=12, fontweight='bold', pad=15)
+            ax2.set_xlabel('Số lượng vật phẩm')
+            ax2.set_ylabel('Giá trị ($)')
+
+            # Tối ưu khoảng cách
+            fig.tight_layout(pad=3.0)
+
+            # Nhúng vào Tkinter
             canvas = FigureCanvasTkAgg(fig, master=self.fig_container)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
         except Exception as e:
-            tk.Label(self.fig_container, text=f"Lỗi hiển thị: {e}").pack()
+            tk.Label(self.fig_container, text=f"Lỗi hiển thị biểu đồ: {e}", bg="white").pack(pady=20)       

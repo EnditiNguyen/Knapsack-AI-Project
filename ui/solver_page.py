@@ -118,11 +118,56 @@ class SolverPage(tk.Frame):
         threading.Thread(target=self._worker, args=(mode,), daemon=True).start()
 
     def _worker(self, mode):
-        cap = float(self.ent_cap.get())
-        solver = GWOSolver(int(self.ent_pop.get()), int(self.ent_iter.get())) if mode == "GWO" else BranchAndBoundSolver()
-        res = solver.solve(self.items, cap)
-        self.after(0, lambda: self._show(res))
+        """Hàm chạy ngầm để tính toán"""
+        try:
+            # Lấy giá trị sức chứa từ Entry
+            cap_val = float(self.ent_cap.get())
+            
+            # Khởi tạo solver
+            if mode == "GWO":
+                pop = int(self.ent_pop.get())
+                iters = int(self.ent_iter.get())
+                solver = GWOSolver(pack_size=pop, max_iter=iters)
+            else:
+                solver = BranchAndBoundSolver()
 
-    def _show(self, res):
+            # Chạy giải thuật
+            res = solver.solve(self.items, cap_val)
+
+            # LỖI Ở ĐÂY TRƯỚC ĐÓ: Phải truyền ĐỦ cả 'res' và 'cap_val' vào lambda
+            self.after(0, lambda: self._show_result(res, cap_val))
+
+        except Exception as e:
+            # Nếu có lỗi (ví dụ nhập chữ thay vì nhập số), hiện thông báo lỗi
+            self.after(0, lambda: messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {str(e)}"))
+
+    def _show_result(self, res, cap):
+        """Hàm hiển thị kết quả lên giao diện (Chạy trên luồng chính)"""
+        # 1. Mở khóa bảng Text để có thể ghi dữ liệu
+        self.txt_res.config(state=tk.NORMAL)
+        
+        # 2. Xóa nội dung cũ
         self.txt_res.delete("1.0", tk.END)
-        self.txt_res.insert("1.0", f"✅ KẾT QUẢ:\n💰 Giá trị: {res.max_value}\n⚖️ Nặng: {res.total_weight:.2f}\n⏱️ Time: {res.execution_time:.4f}s")
+        
+        # 3. Chuẩn bị nội dung hiển thị
+        lines = [
+            "✅ KẾT QUẢ TỐI ƯU",
+            "--------------------------",
+            f"💰 Tổng giá trị: {res.max_value}",
+            f"⚖️ Tổng nặng: {res.total_weight:.2f} / {cap} kg",
+            f"⏱️ Thời gian: {res.execution_time:.4f} giây",
+            "",
+            "📦 CÁC VẬT PHẨM ĐÃ CHỌN:"
+        ]
+        
+        if not res.selected_items:
+            lines.append(" (Không có vật phẩm nào được chọn)")
+        else:
+            for i, item in enumerate(res.selected_items, 1):
+                lines.append(f" {i}. {item.name} ({item.weight}kg - ${item.value})")
+        
+        # 4. Ghi vào bảng Text
+        self.txt_res.insert(tk.END, "\n".join(lines))
+        
+        # 5. Khóa bảng Text lại để người dùng không tự ý gõ chữ vào
+        self.txt_res.config(state=tk.DISABLED)
