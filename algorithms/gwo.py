@@ -25,9 +25,9 @@ class GWOSolver(KnapsackSolver):
         values = np.array([it.value for it in items])
         positions = np.random.uniform(-3, 3, (self.pack_size, n))
         
-        alpha_pos, alpha_score = np.zeros(n), -1e9
-        beta_pos, beta_score = np.zeros(n), -1e9
-        delta_pos, delta_score = np.zeros(n), -1e9
+        alpha_pos, alpha_score = np.zeros(n), -float('inf')
+        beta_pos, beta_score = np.zeros(n), -float('inf')
+        delta_pos, delta_score = np.zeros(n), -float('inf')
 
         for l in range(self.max_iter):
             for i in range(self.pack_size):
@@ -47,13 +47,18 @@ class GWOSolver(KnapsackSolver):
                 elif fitness > delta_score:
                     delta_score, delta_pos = fitness, positions[i].copy()
 
-            a = 2 - l * (2 / self.max_iter)
+            a = 2 - l * (2 / self.max_iter) # Giảm dần từ 2 về 0
             for i in range(self.pack_size):
-                for target in [alpha_pos, beta_pos, delta_pos]:
-                    r1, r2 = random.random(), random.random()
-                    A, C = 2 * a * r1 - a, 2 * r2
-                    D = abs(C * target - positions[i])
-                    positions[i] = (positions[i] + (target - A * D)) / 2
+                # Tính toán X1, X2, X3 dựa trên Alpha, Beta, Delta
+                x_new = np.zeros(n)
+                for target_pos in [alpha_pos, beta_pos, delta_pos]:
+                    r1, r2 = np.random.random(n), np.random.random(n)
+                    A = 2 * a * r1 - a
+                    C = 2 * r2
+                    D = np.abs(C * target_pos - positions[i])
+                    x_new += (target_pos - A * D)
+                
+                positions[i] = x_new / 3
             positions = np.clip(positions, -3, 3)
 
         # Trích xuất kết quả và sửa lỗi nếu còn vượt sức chứa
