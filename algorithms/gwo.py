@@ -23,6 +23,7 @@ class GWOSolver(KnapsackSolver):
         start_time = time.time()
         weights = np.array([it.weight for it in items])
         values = np.array([it.value for it in items])
+        # Khởi tạo quần thể sói (vị trí ngẫu nhiên từ -3 đến 3)
         positions = np.random.uniform(-3, 3, (self.pack_size, n))
         
         alpha_pos, alpha_score = np.zeros(n), -float('inf')
@@ -31,22 +32,23 @@ class GWOSolver(KnapsackSolver):
 
         for l in range(self.max_iter):
             for i in range(self.pack_size):
+                # 1. Chuyển vị trí liên tục sang nhị phân 0/1
                 s_v = self._sigmoid(positions[i])
                 binary_sol = (s_v > random.random()).astype(int)
-                
+                # 2. Tính toán Fitness kèm Hàm Phạt
                 tw = np.dot(binary_sol, weights)
                 tv = np.dot(binary_sol, values)
-                
                 # Hàm phạt: Trừ điểm nặng nếu vượt sức chứa
                 fitness = tv if tw <= capacity else tv - (tw - capacity) * 1000
-                
+
+                # Cập nhật Alpha, Beta, Delta (3 nghiệm tốt nhất)
                 if fitness > alpha_score:
                     alpha_score, alpha_pos = fitness, positions[i].copy()
                 elif fitness > beta_score:
                     beta_score, beta_pos = fitness, positions[i].copy()
                 elif fitness > delta_score:
                     delta_score, delta_pos = fitness, positions[i].copy()
-
+            # Cập nhật vị trí bầy sói theo 3 con đầu đàn
             a = 2 - l * (2 / self.max_iter) # Giảm dần từ 2 về 0
             for i in range(self.pack_size):
                 # Tính toán X1, X2, X3 dựa trên Alpha, Beta, Delta

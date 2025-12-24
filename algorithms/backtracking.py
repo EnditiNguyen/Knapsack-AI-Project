@@ -15,7 +15,7 @@ class BranchAndBoundSolver(KnapsackSolver):
         self.best_items = []
         
         start_time = time.time()
-        self._bnb(0, 0, 0, [])
+        self._bnb(0, 0, 0, []) # Bắt đầu quay lui từ vật phẩm đầu tiên
         exec_time = time.time() - start_time
         
         return KnapsackResult(
@@ -29,23 +29,26 @@ class BranchAndBoundSolver(KnapsackSolver):
         if current_weight >= self.capacity: return 0
         bound_val = current_value
         total_w = current_weight
+        # Lấy đầy các vật phẩm còn lại theo kiểu tham lam
         j = index
         while j < self.n and total_w + self.items[j].weight <= self.capacity:
             total_w += self.items[j].weight
             bound_val += self.items[j].value
             j += 1
+        # Lấy thêm phần lẻ của vật phẩm tiếp theo (Fractional part)
         if j < self.n:
             bound_val += (self.capacity - total_w) * self.items[j].ratio
         return bound_val
 
     def _bnb(self, index, current_weight, current_value, current_items):
+        # Điều kiện dừng: Duyệt hết vật phẩm
         if index == self.n:
             if current_value > self.best_value:
                 self.best_value = current_value
                 self.best_items = list(current_items)
             return
 
-        # Kiểm tra xem cận trên có tốt hơn kết quả tốt nhất hiện tại không
+        # KỸ THUẬT CẮT NHÁNH: Nếu cận trên không tốt hơn kỷ lục cũ thì bỏ qua
         if self._bound(index, current_weight, current_value) <= self.best_value:
             return
 
